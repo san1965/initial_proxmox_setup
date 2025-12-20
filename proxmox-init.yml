@@ -1,0 +1,64 @@
+---
+- name: Proxmox init
+  hosts: proxmoxs
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Disable enterprise repositories (DEB822 format)
+      ansible.builtin.replace:
+        path: "{{ item }}"
+        regexp: 'Enabled: true'
+        replace: 'Enabled: false'
+      loop:
+        - /etc/apt/sources.list.d/pve-enterprise.sources
+        - /etc/apt/sources.list.d/ceph.sources
+      ignore_errors: yes 
+    - name: Create Proxmox No-Subscription repository (DEB822 format)
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/pve-no-subscription.sources
+        content: |
+          Types: deb
+          URIs: http://download.proxmox.com/debian/pve
+          Suites: {{ ansible_distribution_release | default('trixie') }}
+          Components: pve-no-subscription
+          Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+          Enabled: yes
+    - name: Run apt update && upgrade
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: yes
+        force_apt_get: yes
+        dpkg_options: 'force-confold,force-confdef'
+      register: apt_res
+      retries: 3
+      delay: 5
+      until: apt_res is success
+      vars:
+        ansible_command_timeout: 600
+    - name: Update LXC container Template
+      ansible.builtin.shell:
+        cmd: /usr/bin/pveam update
+      changed_when: false
+    - name: Get Proxmox server version
+      ansible.builtin.shell: /usr/bin/pveversion
+      register: pve_ver
+      changed_when: false
+    - name: Remove subscription banner
+      ansible.builtin.shell:
+        cmd: |
+          # Флаг -z позволяет grep искать по нескольким строкам
+          if grep -zEq "orig_cmd\(\);\s+return;" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js; then
+            exit 100
+          else
+            sed -Ezi.bak "s/(function\(orig_cmd\) \{)/\1\n\torig_cmd\(\);\n\treturn;/g" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+            exit 0
+          fi
+      register: sed_result
+      changed_when: "sed_result.rc == 0"
+      failed_when: "sed_result.rc != 0 and sed_result.rc != 100"
+      notify: Restart pveproxy
+  handlers:
+    - name: Restart pveproxy
+      ansible.builtin.systemd:
+        state: restarted
+        name: pveproxy.service
