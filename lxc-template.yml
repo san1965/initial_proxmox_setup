@@ -1,0 +1,17 @@
+---
+- name: Ubuntu template LXC
+  hosts: proxmoxs
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Shutdown container
+      ansible.builtin.shell:
+        cmd: pct shutdown 8000 && pct wait 8000
+
+    - name: Create template container Ubuntu
+      ansible.builtin.shell:
+        cmd: pct template 8000
+      register: template_result
+      failed_when: 
+        - template_result.rc != 0 
+        - "'already a template' not in template_result.stderr"
