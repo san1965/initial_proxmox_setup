@@ -6,7 +6,13 @@
   tasks:
     - name: Shutdown container
       ansible.builtin.shell:
-        cmd: pct shutdown 8000 && pct wait 8000
+        cmd: pct shutdown 8000 || true
+    - name: Wait for container to stop (max 60s)
+      ansible.builtin.shell: pct status 8000
+      register: container_status
+      until: "'status: stopped' in container_status.stdout"
+      retries: 20
+      delay: 3
     - name: Create template container Ubuntu
       ansible.builtin.shell:
         cmd: pct template 8000
