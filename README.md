@@ -1,5 +1,5 @@
 # Initial Proxmox Setup
-Начальное конфигурирование Proxmox Opentofu/Ansible
+Начальное конфигурирование Proxmox Opentofu/Ansible.
 Opentofu будет использоваться для создания ресурсов, а Ansible для настройки виртуальной машины и контейнера LXC
 ### Установка Opentofu 
 ```bash
