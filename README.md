@@ -1,5 +1,6 @@
 # InitialProxmoxSetup
 Начальное конфигурирование Proxmox Opentofu/Ansible
+Opentofu будет использоваться для создания ресурсов, а Ansible для настройки виртуальной машины и контейнера LXC
 ### Установка Opentofu 
 ```bash
 curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
@@ -15,6 +16,24 @@ pveum role add Tofu -privs "Realm.AllocateUser, VM.PowerMgmt, VM.GuestAgent.Unre
 pveum aclmod / -user tofu@pve -role Tofu
 pveum user token add tofu@pve provider --privsep=0 tofu@pve!provider
 ssh-keygen
-ssh-copy-id root@192.168.1.100 
+ssh-copy-id root@pve
 ```
+###	Установка Ansible (ubuntu)
+```bash
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+```
+### Инициализация Opentofu
+В процессе инициализации, загружается и устанавливается провайдер bpg/proxmox. Создаётся файл состояния (state file), который отслеживает изменения инфраструктуры. Генерируется локальный кеш.
+```bash
+tofu init
+```
+
+### Изменения инфраструктуры
+```bash
+tofu apply
+```
+
 
