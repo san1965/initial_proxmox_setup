@@ -1,8 +1,11 @@
 # InitialProxmoxSetup
 Начальное конфигурирование Proxmox Opentofu/Ansible
-•	Установка Opentofu 
-o	Загружаем установочный скрипт:
-#curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+##	Установка Opentofu 
+###	Загружаем установочный скрипт:
+```bash
+curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+```
+curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
 o	 Альтернатива: 
 #wget --secure-protocol=TLSv1_2 --https-only https://get.opentofu.org/install-opentofu.sh -O install-opentofu.sh
 o	Устанавливаем разрешение на выполнение:
