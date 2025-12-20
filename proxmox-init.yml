@@ -46,7 +46,6 @@
     - name: Remove subscription banner
       ansible.builtin.shell:
         cmd: |
-          # Флаг -z позволяет grep искать по нескольким строкам
           if grep -zEq "orig_cmd\(\);\s+return;" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js; then
             exit 100
           else
