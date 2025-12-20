@@ -1,0 +1,22 @@
+---
+- name: Ubuntu template VM
+  hosts: proxmoxs
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Shutdown VM
+      ansible.builtin.shell:
+        cmd: qm shutdown 9000 && qm wait 9000 --timeout 60
+      register: shutdown_res
+      ignore_errors: yes
+    - name: Force stop if still running
+      ansible.builtin.shell:
+        cmd: qm stop 9000
+      when: shutdown_res.rc != 0
+    - name: Create template VM Ubuntu
+      ansible.builtin.shell:
+        cmd: qm template 9000
+      register: template_res
+      failed_when: 
+        - template_res.rc != 0 
+        - "'already a template' not in template_res.stderr"
