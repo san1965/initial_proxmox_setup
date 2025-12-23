@@ -13,6 +13,5 @@ provider "proxmox" {
   ssh {
     agent    = true
     username = "root"
-    private_key = "~/virtualization/.ssh/id_ed25519"
   }
 }
