@@ -126,9 +126,6 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   vga {
     type = "serial0"
   }
-  provisioner "local-exec" {
-    command = "ssh root@${self.node_name} 'qm set ${self.vm_id} --kvm false --ciupgrade false && qm start ${self.vm_id}'"
-  }
   connection {
    type        = "ssh"
    user        = "ubuntu"
